@@ -1,0 +1,105 @@
+local HackGUI = Instance.new("ScreenGui")
+HackGUI.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+local GuiScreen = Instance.new("Frame", HackGUI)
+GuiScreen.Size = UDim2.new(0, 300, 0, 400)
+GuiScreen.Position = UDim2.new(0.5, 0, 0.5, 0)
+GuiScreen.AnchorPoint = Vector2.new(0.5, 0.5)
+GuiScreen.BackgroundColor3 = Color3.new(0, 0, 1) -- Set background color to blue
+
+-- Make the Frame Draggable
+local dragging
+local dragInput
+local dragStart
+local startPos
+
+local function update(input)
+	local delta = input.Position - dragStart
+	GuiScreen.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+		startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+GuiScreen.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStart = input.Position
+		startPos = GuiScreen.Position
+
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+GuiScreen.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+		dragInput = input
+	end
+end)
+
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+	if dragging and input == dragInput then
+		update(input)
+	end
+end)
+
+-- Create buttons for each player
+local buttonHeight = 50
+local padding = 10
+
+local buttonHeight = 50 -- Define button height
+local padding = 10 -- Define padding between buttons
+
+for i, v in ipairs(game.Players:GetPlayers()) do
+	local New = Instance.new("TextButton", GuiScreen)
+	New.Text = v.Name
+	New.Size = UDim2.new(0, 200, 0, buttonHeight) -- Set button size
+	New.Position = UDim2.new(0.5, 0, 0, (i - 1) * (buttonHeight + padding)) -- Center and position below previous button
+	New.AnchorPoint = Vector2.new(0.5, 0) -- Center horizontally
+	New.BackgroundColor3 = Color3.new(1, 1, 1) -- Set button background color to white (optional)
+	New.Name = v.Name -- Set the name of the button to the player's name
+
+	-- Connect click event for each button
+	New.MouseButton1Click:Connect(function()
+		print(v.Name .. " button clicked!")
+
+		local player1 = game.Players:FindFirstChild(v.Name)
+		if player1 and player1.Character then
+			local root1 = player1.Character:FindFirstChild("HumanoidRootPart")
+			if root1 then
+				local player = game.Players.LocalPlayer
+				if player and player.Character then
+					local root = player.Character:FindFirstChild("HumanoidRootPart")
+					if root then
+						root.CFrame = root1.CFrame * CFrame.new(0, 0, 3)
+					else
+						warn("Local player's HumanoidRootPart not found.")
+					end
+				else
+					warn("Local player or local player's character not found.")
+				end
+			else
+				warn("Target player's HumanoidRootPart not found.")
+			end
+		else
+			warn("Target player or target player's character not found.")
+		end
+	end)
+end
+
+
+-- Create Exit Button
+local exitButton = Instance.new("TextButton", GuiScreen)
+exitButton.Text = "Exit"
+exitButton.Size = UDim2.new(0, 50, 0, 25)
+exitButton.Position = UDim2.new(1, -55, 0, 5) -- Adjusted position to be closer to the corner
+exitButton.AnchorPoint = Vector2.new(1, 0) -- Anchor to the top-right corner
+exitButton.BackgroundColor3 = Color3.new(1, 0, 0) -- Set background color to red
+
+exitButton.MouseButton1Click:Connect(function()
+	HackGUI:Destroy()
+end)
+local x = Instance.new("UICorner", GuiScreen)
+x.CornerRadius = UDim.new(0,20)
